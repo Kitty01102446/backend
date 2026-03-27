@@ -6,7 +6,7 @@
 """
 
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 
@@ -95,10 +95,20 @@ def create_app():
         print("❌ booking_controller failed::", e)
         raise
 
+    @app.before_request
+    def log_request_start():
+        # บันทึก request ที่เข้ามาเพื่อดูจาก Railway logs ได้ทันที
+        print(f"➡️ {request.method} {request.path}")
+
     @app.route("/")
     def home():
         # หน้าเริ่มต้น เพื่อยืนยันว่าแอพพร้อมใช้งาน
         return {"message": "Flask + MySQL Ready!222"}
+
+    @app.route("/health")
+    def health():
+        # route เบา ๆ สำหรับเช็กว่า worker ตอบ request ได้จริง
+        return {"status": "ok"}, 200
 
     return app
 

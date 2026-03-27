@@ -27,7 +27,7 @@ SET time_zone = "+00:00";
 -- Table structure for table `address`
 --
 
-CREATE TABLE `address` (
+CREATE TABLE IF NOT EXISTS `address` (
   `address_id` int(11) NOT NULL,
   `province` varchar(200) DEFAULT NULL,
   `district` varchar(200) DEFAULT NULL,
@@ -81,11 +81,12 @@ INSERT INTO `address` (`address_id`, `province`, `district`, `subdistrict`, `pos
 -- Table structure for table `bill`
 --
 
-CREATE TABLE `bill` (
-  `bill_id` int(11) NOT NULL,
-  `total_amount` float DEFAULT NULL,
-  `store_id` int(11) DEFAULT NULL,
-  `status_id` int(11) DEFAULT NULL
+CREATE TABLE IF NOT EXISTS `bill` (
+  `bill_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `total_amount` DECIMAL(10,2) DEFAULT 0.00,
+  `store_id` INT(11) DEFAULT NULL,
+  `status_id` INT(11) DEFAULT NULL,
+  PRIMARY KEY (`bill_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -105,7 +106,7 @@ INSERT INTO `bill` (`bill_id`, `total_amount`, `store_id`, `status_id`) VALUES
 -- Table structure for table `booking`
 --
 
-CREATE TABLE `booking` (
+CREATE TABLE IF NOT EXISTS `booking` (
   `booking_id` int(11) NOT NULL,
   `booking_date` date DEFAULT NULL,
   `booking_time` time DEFAULT NULL,
@@ -141,7 +142,7 @@ INSERT INTO `booking` (`booking_id`, `booking_date`, `booking_time`, `user_id`, 
 -- Table structure for table `bookings`
 --
 
-CREATE TABLE `bookings` (
+CREATE TABLE IF NOT EXISTS `bookings` (
   `booking_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `store_id` int(11) NOT NULL,
@@ -230,7 +231,7 @@ INSERT INTO `bookings` (`booking_id`, `user_id`, `store_id`, `employee_id`, `boo
 -- Table structure for table `booking_services`
 --
 
-CREATE TABLE `booking_services` (
+CREATE TABLE IF NOT EXISTS `booking_services` (
   `booking_service_id` int(11) NOT NULL,
   `booking_id` int(11) NOT NULL,
   `service_id` int(11) NOT NULL,
@@ -360,7 +361,7 @@ INSERT INTO `booking_services` (`booking_service_id`, `booking_id`, `service_id`
 -- Table structure for table `click_log`
 --
 
-CREATE TABLE `click_log` (
+CREATE TABLE IF NOT EXISTS `click_log` (
   `click_log_id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL,
   `store_id` int(11) DEFAULT NULL,
@@ -387,7 +388,7 @@ INSERT INTO `click_log` (`click_log_id`, `user_id`, `store_id`, `created_at`, `u
 -- Table structure for table `employee`
 --
 
-CREATE TABLE `employee` (
+CREATE TABLE IF NOT EXISTS `employee` (
   `employee_id` int(11) NOT NULL,
   `fullname` varchar(200) DEFAULT NULL,
   `phone` varchar(50) DEFAULT NULL,
@@ -551,7 +552,7 @@ INSERT INTO `employee` (`employee_id`, `fullname`, `phone`, `email`, `position`,
 -- Table structure for table `favorite`
 --
 
-CREATE TABLE `favorite` (
+CREATE TABLE IF NOT EXISTS `favorite` (
   `favorite_id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL,
   `store_id` int(11) DEFAULT NULL,
@@ -575,7 +576,7 @@ INSERT INTO `favorite` (`favorite_id`, `user_id`, `store_id`, `created_at`, `upd
 -- Table structure for table `payment`
 --
 
-CREATE TABLE `payment` (
+CREATE TABLE IF NOT EXISTS `payment` (
   `payment_id` int(11) NOT NULL,
   `method` varchar(200) DEFAULT NULL,
   `payment_date` varchar(200) DEFAULT NULL,
@@ -601,7 +602,7 @@ INSERT INTO `payment` (`payment_id`, `method`, `payment_date`, `amount`, `bookin
 -- Table structure for table `permission`
 --
 
-CREATE TABLE `permission` (
+CREATE TABLE IF NOT EXISTS `permission` (
   `permission_id` int(11) NOT NULL,
   `code` varchar(200) DEFAULT NULL,
   `name` varchar(200) DEFAULT NULL,
@@ -626,7 +627,7 @@ INSERT INTO `permission` (`permission_id`, `code`, `name`, `created_at`, `update
 -- Table structure for table `promotion`
 --
 
-CREATE TABLE `promotion` (
+CREATE TABLE IF NOT EXISTS `promotion` (
   `promo_id` int(11) NOT NULL,
   `name` varchar(200) DEFAULT NULL,
   `discount` float DEFAULT NULL,
@@ -649,7 +650,7 @@ INSERT INTO `promotion` (`promo_id`, `name`, `discount`, `store_id`, `type_promo
 -- Table structure for table `review`
 --
 
-CREATE TABLE `review` (
+CREATE TABLE IF NOT EXISTS `review` (
   `review_id` int(11) NOT NULL,
   `rating` int(11) DEFAULT NULL,
   `comment` varchar(300) DEFAULT NULL,
@@ -854,7 +855,7 @@ INSERT INTO `review` (`review_id`, `rating`, `comment`, `user_id`, `store_id`, `
 -- Table structure for table `role`
 --
 
-CREATE TABLE `role` (
+CREATE TABLE IF NOT EXISTS `role` (
   `role_id` int(11) NOT NULL,
   `role_name` varchar(200) NOT NULL,
   `description` varchar(200) DEFAULT NULL,
@@ -877,7 +878,7 @@ INSERT INTO `role` (`role_id`, `role_name`, `description`, `created_at`) VALUES
 -- Table structure for table `role_permission`
 --
 
-CREATE TABLE `role_permission` (
+CREATE TABLE IF NOT EXISTS `role_permission` (
   `role_permission_id` int(11) NOT NULL,
   `permission_id` int(11) DEFAULT NULL,
   `role_id` int(11) DEFAULT NULL,
@@ -905,7 +906,7 @@ INSERT INTO `role_permission` (`role_permission_id`, `permission_id`, `role_id`,
 -- Table structure for table `service`
 --
 
-CREATE TABLE `service` (
+CREATE TABLE IF NOT EXISTS `service` (
   `service_id` int(11) NOT NULL,
   `service_name` varchar(200) DEFAULT NULL,
   `price` float DEFAULT NULL,
@@ -1202,7 +1203,7 @@ INSERT INTO `service` (`service_id`, `service_name`, `price`, `duration_minutes`
 -- Table structure for table `status_booking`
 --
 
-CREATE TABLE `status_booking` (
+CREATE TABLE IF NOT EXISTS `status_booking` (
   `status_booking_id` int(11) NOT NULL,
   `status_booking_name` varchar(200) DEFAULT NULL,
   `description` varchar(200) DEFAULT NULL
@@ -1224,7 +1225,7 @@ INSERT INTO `status_booking` (`status_booking_id`, `status_booking_name`, `descr
 -- Table structure for table `status_service`
 --
 
-CREATE TABLE `status_service` (
+CREATE TABLE IF NOT EXISTS `status_service` (
   `status_service_id` int(11) NOT NULL,
   `status_service_name` varchar(200) DEFAULT NULL,
   `description` varchar(200) DEFAULT NULL
@@ -1244,7 +1245,7 @@ INSERT INTO `status_service` (`status_service_id`, `status_service_name`, `descr
 -- Table structure for table `status_store`
 --
 
-CREATE TABLE `status_store` (
+CREATE TABLE IF NOT EXISTS `status_store` (
   `status_store_id` int(11) NOT NULL,
   `status_store_name` varchar(200) DEFAULT NULL,
   `description` varchar(200) DEFAULT NULL
@@ -1265,7 +1266,7 @@ INSERT INTO `status_store` (`status_store_id`, `status_store_name`, `description
 -- Table structure for table `store`
 --
 
-CREATE TABLE `store` (
+CREATE TABLE IF NOT EXISTS `store` (
   `store_id` int(11) NOT NULL,
   `store_name` varchar(200) DEFAULT NULL,
   `price` decimal(10,2) NOT NULL DEFAULT 0.00,
@@ -1378,7 +1379,7 @@ INSERT INTO `store` (`store_id`, `store_name`, `price`, `phone`, `email`, `user_
 -- Table structure for table `store_address`
 --
 
-CREATE TABLE `store_address` (
+CREATE TABLE IF NOT EXISTS `store_address` (
   `store_address_id` int(11) NOT NULL,
   `province` varchar(200) DEFAULT NULL,
   `district` varchar(200) DEFAULT NULL,
@@ -1487,7 +1488,7 @@ INSERT INTO `store_address` (`store_address_id`, `province`, `district`, `subdis
 -- Table structure for table `store_tag`
 --
 
-CREATE TABLE `store_tag` (
+CREATE TABLE IF NOT EXISTS `store_tag` (
   `store_tag_id` int(11) NOT NULL,
   `store_id` int(11) NOT NULL,
   `tag_id` int(11) NOT NULL,
@@ -1509,7 +1510,7 @@ INSERT INTO `store_tag` (`store_tag_id`, `store_id`, `tag_id`, `created_at`) VAL
 -- Table structure for table `tag`
 --
 
-CREATE TABLE `tag` (
+CREATE TABLE IF NOT EXISTS `tag` (
   `tag_id` int(11) NOT NULL,
   `tag_name` varchar(100) NOT NULL,
   `created_at` datetime DEFAULT current_timestamp()
@@ -1532,7 +1533,7 @@ INSERT INTO `tag` (`tag_id`, `tag_name`, `created_at`) VALUES
 -- Table structure for table `token`
 --
 
-CREATE TABLE `token` (
+CREATE TABLE IF NOT EXISTS `token` (
   `token_id` int(11) NOT NULL,
   `jwt_key` varchar(300) DEFAULT NULL,
   `user_id` int(11) DEFAULT NULL,
@@ -1554,7 +1555,7 @@ INSERT INTO `token` (`token_id`, `jwt_key`, `user_id`, `created_at`, `expired_at
 -- Table structure for table `type_booking`
 --
 
-CREATE TABLE `type_booking` (
+CREATE TABLE IF NOT EXISTS `type_booking` (
   `type_booking_id` int(11) NOT NULL,
   `type_booking_name` varchar(200) DEFAULT NULL,
   `description` varchar(200) DEFAULT NULL
@@ -1575,7 +1576,7 @@ INSERT INTO `type_booking` (`type_booking_id`, `type_booking_name`, `description
 -- Table structure for table `type_promo`
 --
 
-CREATE TABLE `type_promo` (
+CREATE TABLE IF NOT EXISTS `type_promo` (
   `type_promo_id` int(11) NOT NULL,
   `name` varchar(200) DEFAULT NULL,
   `description` varchar(200) DEFAULT NULL
@@ -1596,7 +1597,7 @@ INSERT INTO `type_promo` (`type_promo_id`, `name`, `description`) VALUES
 -- Table structure for table `type_service`
 --
 
-CREATE TABLE `type_service` (
+CREATE TABLE IF NOT EXISTS `type_service` (
   `type_id` int(11) NOT NULL,
   `name` varchar(200) DEFAULT NULL,
   `description` varchar(200) DEFAULT NULL
@@ -1618,7 +1619,7 @@ INSERT INTO `type_service` (`type_id`, `name`, `description`) VALUES
 -- Table structure for table `users`
 --
 
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
   `user_id` int(11) NOT NULL,
   `username` varchar(100) NOT NULL,
   `nickname` varchar(100) NOT NULL,

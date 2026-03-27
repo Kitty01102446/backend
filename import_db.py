@@ -15,11 +15,16 @@ cursor = conn.cursor()
 with open("nailshop.sql", "r", encoding="utf-8") as f:
     sql = f.read()
 
-# 🔥 ใช้ตัวนี้เท่านั้น (ห้าม split)
-for result in cursor.execute(sql, multi=True):
-    pass
+# 🔥 แยกคำสั่ง SQL ทีละตัว
+statements = [s.strip() for s in sql.split(";") if s.strip()]
+
+for stmt in statements:
+    try:
+        cursor.execute(stmt)
+    except Exception as e:
+        print("⚠️ Skip:", e)
 
 cursor.close()
 conn.close()
 
-print("✅ Import success")
+print("✅ Import done")

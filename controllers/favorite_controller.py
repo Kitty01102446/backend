@@ -7,7 +7,7 @@ from services.favorite_service import (
     delete_favorite,
 )
 
-favorite_bp = Blueprint("favorite_bp", __name__)
+favorite_bp = Blueprint("favorite", __name__, url_prefix="/favorite")
 
 # ============================================================
 #   GET /favorite (list all) + POST /favorite (create)

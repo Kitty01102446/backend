@@ -40,7 +40,7 @@ from services.users_service import (
     login_google_service
 )
 
-users_bp = Blueprint("users_bp", __name__)
+users_bp = Blueprint('users', __name__, url_prefix='/users')
 
 # ============================================================
 #   POST /register (register a new user)

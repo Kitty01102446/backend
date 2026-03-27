@@ -9,7 +9,7 @@ from services.store_service import (
 from services.db import get_conn
 
 
-store_bp = Blueprint("store_bp", __name__)
+store_bp = Blueprint("store", __name__, url_prefix="/store")
 
 # ============================================================
 #   GET /store (list all) + POST /store (create)

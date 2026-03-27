@@ -7,7 +7,7 @@ from services.address_service import (
     delete_address,
 )
 
-address_bp = Blueprint("address_bp", __name__)
+address_bp = Blueprint("address", __name__, url_prefix="/address")
 
 # ============================================================
 #   GET /address (list all) + POST /address (create)

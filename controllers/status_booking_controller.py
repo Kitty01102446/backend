@@ -7,7 +7,7 @@ from services.status_booking_service import (
     delete_status_booking,
 )
 
-status_booking_bp = Blueprint("status_booking_bp", __name__)
+status_booking_bp = Blueprint("status_booking", __name__, url_prefix="/status_booking")
 
 # ============================================================
 #   GET /status_booking (list all) + POST /status_booking (create)

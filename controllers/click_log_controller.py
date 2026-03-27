@@ -7,7 +7,7 @@ from services.click_log_service import (
     delete_click_log,
 )
 
-click_log_bp = Blueprint("click_log_bp", __name__)
+click_log_bp = Blueprint("click_log", __name__, url_prefix="/click_log")
 
 # ============================================================
 #   GET /click_log   +   POST /click_log

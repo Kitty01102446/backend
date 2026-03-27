@@ -9,7 +9,7 @@ from services.employee_service import (
     get_employees_by_store
 )
 
-employee_bp = Blueprint("employee_bp", __name__)
+employee_bp = Blueprint("employee", __name__, url_prefix="/employee")
 
 # ============================================================
 #   GET /employees (list all) + POST /employees (create)

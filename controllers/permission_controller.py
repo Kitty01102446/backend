@@ -7,7 +7,7 @@ from services.permission_service import (
     delete_permission,
 )
 
-permission_bp = Blueprint("permission_bp", __name__)
+permission_bp = Blueprint("permission", __name__, url_prefix="/permission")
 
 # ============================================================
 #   GET /permission (list all) + POST /permission (create)

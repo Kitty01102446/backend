@@ -7,7 +7,7 @@ from services.role_permission_service import (
     delete_role_permission,
 )
 
-role_permission_bp = Blueprint("role_permission_bp", __name__)
+role_permission_bp = Blueprint("role_permission", __name__, url_prefix="/role_permission")
 
 # ============================================================
 #   GET /role_permission (list all) + POST /role_permission (create)

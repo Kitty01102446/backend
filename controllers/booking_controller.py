@@ -40,7 +40,7 @@ from services.booking_service import (
     get_user_bookings
 )
 
-booking_bp = Blueprint("booking_bp", __name__)
+booking_bp = Blueprint("booking", __name__, url_prefix="/booking")
 
 # ============================================================
 #   GET /booking (list all)

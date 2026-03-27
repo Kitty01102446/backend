@@ -7,7 +7,7 @@ from services.bill_service import (
     delete_bill,
 )
 
-bill_bp = Blueprint("bill_bp", __name__)
+bill_bp = Blueprint("bill", __name__, url_prefix="/bill")
 
 # ============================================================
 #   GET /bill (list all) + POST /bill (create)

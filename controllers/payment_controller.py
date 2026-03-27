@@ -7,7 +7,7 @@ from services.payment_service import (
     delete_payment,
 )
 
-payment_bp = Blueprint("payment_bp", __name__)
+payment_bp = Blueprint("payment", __name__, url_prefix="/payment")
 
 # ============================================================
 #   GET /payment (list all) + POST /payment (create)

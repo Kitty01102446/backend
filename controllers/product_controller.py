@@ -7,7 +7,7 @@ from services.product_service import (
     delete_product,
 )
 
-products_bp = Blueprint("products_bp", __name__)
+products_bp = Blueprint("products", __name__, url_prefix="/products")
 
 # ============================================================
 #   GET /products (list all) + POST /products (create)

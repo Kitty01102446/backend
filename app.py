@@ -147,6 +147,7 @@ def create_app():
 
     @app.route("/")
     def home():
+        print("🔥 HOME CALLED")
         # หน้าเริ่มต้น เพื่อยืนยันว่าแอพพร้อมใช้งาน
         return {"message": "Flask + MySQL Ready!222"}
 

@@ -7,7 +7,7 @@ from services.store_address_service import (
     delete_store_address,
 )
 
-store_address_bp = Blueprint("store_address", __name__, url_prefix="/store_address")
+store_address_bp = Blueprint("store_address_bp", __name__)
 
 # ============================================================
 #   GET /store_address

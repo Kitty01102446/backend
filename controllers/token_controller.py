@@ -7,7 +7,7 @@ from services.token_service import (
     delete_token,
 )
 
-token_bp = Blueprint("token", __name__, url_prefix="/token")
+token_bp = Blueprint("token_bp", __name__)
 
 # ============================================================
 #   GET /token  +  POST /token

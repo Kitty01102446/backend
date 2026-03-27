@@ -7,7 +7,7 @@ from services.promotion_service import (
     delete_promotion,
 )
 
-promotion_bp = Blueprint("promotion", __name__, url_prefix="/promotion")
+promotion_bp = Blueprint("promotion_bp", __name__)
 
 # ============================================================
 #   GET /promotion (list all) + POST /promotion (create)

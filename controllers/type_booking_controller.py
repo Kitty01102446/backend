@@ -7,7 +7,7 @@ from services.type_booking_service import (
     delete_type_booking,
 )
 
-type_booking_bp = Blueprint("type_booking", __name__, url_prefix="/type_booking")
+type_booking_bp = Blueprint("type_booking_bp", __name__)
 
 # ============================================================
 #   GET /type_booking  +  POST /type_booking

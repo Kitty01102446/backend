@@ -11,7 +11,7 @@ from services.service_service import (
     get_monthly_income_by_store_year
 )
 
-service_bp = Blueprint("service", __name__, url_prefix="/service")
+service_bp = Blueprint("service_bp", __name__)
 
 # ============================================================
 #   GET /service (list all) + POST /service (create)

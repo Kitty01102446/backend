@@ -6,7 +6,8 @@ conn = pymysql.connect(
     user=os.getenv("MYSQLUSER"),
     password=os.getenv("MYSQLPASSWORD"),
     database=os.getenv("MYSQLDATABASE"),
-    port=int(os.getenv("MYSQLPORT"))
+    port=int(os.getenv("MYSQLPORT")),
+    autocommit=True
 )
 
 cursor = conn.cursor()
@@ -14,11 +15,11 @@ cursor = conn.cursor()
 with open("nailshop.sql", "r", encoding="utf-8") as f:
     sql = f.read()
 
-for statement in sql.split(";"):
-    if statement.strip():
-        cursor.execute(statement)
+# 🔥 ใช้ตัวนี้เท่านั้น (ห้าม split)
+for result in cursor.execute(sql, multi=True):
+    pass
 
-conn.commit()
+cursor.close()
 conn.close()
 
 print("✅ Import success")

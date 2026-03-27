@@ -104,9 +104,12 @@ def create_app():
 
 
 # 💡 ส่วนนี้จะถูกใช้รันใน Development Mode
+import os
+
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True, port=5010) # กำหนด port ชัดเจน (สมมติว่าเป็น 5000)
+    port = int(os.environ.get("PORT", 5010))
+    app.run(host="0.0.0.0", port=port) # กำหนด port ชัดเจน (สมมติว่าเป็น 5000)
 
 # 💡 ส่วนนี้จะถูกใช้รันใน Production/Staging (ด้วย Gunicorn/uWSGI)
 # Gunicorn จะอ้างอิงถึงตัวแปร 'app' นี้เพื่อนำไปรัน

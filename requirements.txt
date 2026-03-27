@@ -6,3 +6,4 @@ python-dotenv>=0.21
 google-auth>=2.0
 gunicorn>=21.0
 Werkzeug>=2.0
+requests

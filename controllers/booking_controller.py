@@ -1,6 +1,7 @@
 import os
 import sys
 from services.booking_service import get_store_bookings
+from services.db import get_conn
 from services.booking_service import (
     get_all_booking,
     get_booking_by_id,
@@ -246,4 +247,3 @@ def get_employee_schedule(employee_id, date):
     rows = get_employee_booked_times(employee_id, date)
 
     return jsonify(rows), 200
-

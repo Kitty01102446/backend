@@ -11,17 +11,28 @@ import pymysql
 from pymysql.cursors import DictCursor
 
 
+def _get_env(*keys, default=None):
+    """คืนค่า env ตัวแรกที่มีข้อมูล เพื่อรองรับหลายชื่อ key"""
+    for key in keys:
+        value = os.getenv(key)
+        if value not in (None, ""):
+            return value
+    return default
+
+
 def _get_db_config():
     """เตรียม dictionary ของการตั้งค่า DB โดยอ่านจาก environment variables
 
     ค่าพื้นฐานจะถูกใช้เป็นค่าเริ่มต้นถ้าไม่ได้กำหนดใน env
     """
+    port_value = _get_env("DB_PORT", "MYSQLPORT", default="3306")
+
     return {
-        "host": os.getenv("DB_HOST"),
-        "port": int(os.getenv("DB_PORT")),
-        "user": os.getenv("DB_USER"),
-        "password": os.getenv("DB_PASS"),
-        "database": os.getenv("DB_NAME"),
+        "host": _get_env("DB_HOST", "MYSQLHOST"),
+        "port": int(port_value),
+        "user": _get_env("DB_USER", "MYSQLUSER"),
+        "password": _get_env("DB_PASS", "MYSQLPASSWORD"),
+        "database": _get_env("DB_NAME", "MYSQLDATABASE"),
         "cursorclass": DictCursor,
         "charset": "utf8mb4",
         "autocommit": True,

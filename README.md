@@ -26,6 +26,8 @@ PORT=5000
 หมายเหตุ:
 - ถ้าใช้ MySQL ของ Railway เอง ให้คัดลอกค่าจาก service database มาใส่
 - ไฟล์ `.env` ในเครื่องใช้สำหรับ local development เท่านั้น Railway จะใช้ค่าจากหน้า Variables
+- ตอนนี้ backend รองรับทั้งชุด `DB_*` และค่ามาตรฐานของ Railway (`MYSQLHOST`, `MYSQLPORT`, `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLDATABASE`) แล้ว
+- ถ้าไม่ได้ตั้ง `DB_PORT` ระบบจะ fallback เป็น `3306` อัตโนมัติ
 
 ## Start Command
 

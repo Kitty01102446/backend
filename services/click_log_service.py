@@ -6,56 +6,52 @@ from services.db import get_conn
 def get_all_click_logs():
     conn = get_conn()
     cur = conn.cursor()
-    # ใช้ SELECT เฉพาะคอลัมน์ที่ต้องการ และใช้ AS เพื่อเปลี่ยนชื่อคอลัมน์ที่ไม่ซ้ำกัน
     cur.execute("""
-      SELECT 
-    click_log.click_log_id, 
-    click_log.user_id AS click_log_user_id, 
-    click_log.store_id AS click_log_store_id, 
-    click_log.created_at, 
-    click_log.updated_at, 
-    click_log.deleted_at, 
-
-    store.store_id,
-    store.store_name,
-    store.price,
-    store.image,
-
-    users.user_id,
-    review.rating,
-
-    GROUP_CONCAT(tag.tag_name) AS tag   -- ✅ tag ร้าน
-
-FROM click_log
-JOIN store ON click_log.store_id = store.store_id
-JOIN users ON click_log.user_id = users.user_id
-
-LEFT JOIN review 
-  ON click_log.store_id = review.store_id 
- AND click_log.user_id = review.user_id
-
-LEFT JOIN store_tag ON store.store_id = store_tag.store_id
-LEFT JOIN tag ON store_tag.tag_id = tag.tag_id
-
-WHERE click_log.deleted_at IS NULL
-GROUP BY click_log.click_log_id;
-
+        SELECT
+            cl.click_log_id,
+            cl.user_id AS click_log_user_id,
+            cl.store_id AS click_log_store_id,
+            cl.created_at,
+            cl.updated_at,
+            cl.deleted_at,
+            s.store_id,
+            s.store_name,
+            s.price,
+            s.image,
+            u.user_id,
+            rv.rating,
+            tg.tag
+        FROM click_log cl
+        JOIN store s
+            ON cl.store_id = s.store_id
+        JOIN users u
+            ON cl.user_id = u.user_id
+        LEFT JOIN (
+            SELECT
+                store_id,
+                user_id,
+                AVG(rating) AS rating
+            FROM review
+            GROUP BY store_id, user_id
+        ) rv
+            ON cl.store_id = rv.store_id
+           AND cl.user_id = rv.user_id
+        LEFT JOIN (
+            SELECT
+                st.store_id,
+                GROUP_CONCAT(t.tag_name ORDER BY t.tag_name SEPARATOR ', ') AS tag
+            FROM store_tag st
+            JOIN tag t
+                ON st.tag_id = t.tag_id
+            GROUP BY st.store_id
+        ) tg
+            ON s.store_id = tg.store_id
+        WHERE cl.deleted_at IS NULL
+        ORDER BY cl.created_at DESC, cl.click_log_id DESC
     """)
-    rows = cur.fetchall()  # ดึงข้อมูลทั้งหมด
-    columns = [col_desc[0] for col_desc in cur.description]  # เก็บชื่อคอลัมน์ทั้งหมด
+    rows = cur.fetchall()
     cur.close()
     conn.close()
-
-    # ตรวจสอบชื่อคอลัมน์ที่ดึงมา
-    print(columns)  # ดูชื่อคอลัมน์ที่ดึงมา
-
-    # แปลงข้อมูลแต่ละแถวให้เป็น dictionary โดยใช้ชื่อคอลัมน์ที่ถูกต้อง
-    results = []
-    for row in rows:
-        row_dict = dict(zip(columns, row))
-        print(row_dict)  # ดูค่าที่แปลงแล้ว
-        results.append(row_dict)
-
     return rows
 
 # ============================================================

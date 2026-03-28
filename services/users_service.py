@@ -24,7 +24,21 @@ def get_all_users():
 def get_user_by_id(uid: int):
     conn = get_conn()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM users WHERE user_id=%s AND deleted_at IS NULL", (uid,))
+    cur.execute("""
+        SELECT
+            user_id,
+            username,
+            nickname,
+            phone,
+            email,
+            role_id,
+            created_at,
+            updated_at,
+            deleted_at
+        FROM users
+        WHERE user_id = %s
+          AND deleted_at IS NULL
+    """, (uid,))
     row = cur.fetchone()
     cur.close()
     conn.close()
@@ -328,7 +342,6 @@ def login_google_service(token):
     except Exception as e:
         print("Google login error:", e)
         raise Exception("Google login failed")
-
 
 
 

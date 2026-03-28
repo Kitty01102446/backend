@@ -95,8 +95,22 @@ def get_store_by_user(user_id):
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT * FROM store
+        SELECT
+            store_id,
+            store_name,
+            price,
+            phone,
+            email,
+            user_id,
+            address,
+            image,
+            status_store_id,
+            created_at,
+            updated_at,
+            deleted_at
+        FROM store
         WHERE user_id = %s
+          AND deleted_at IS NULL
         LIMIT 1
     """, (user_id,))
 
@@ -143,7 +157,6 @@ def get_store_info(sid):
         return jsonify({"error": "Store not found"}), 404
 
     return jsonify(row), 200
-
 
 
 

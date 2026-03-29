@@ -334,6 +334,8 @@ def get_store_bookings(store_id: int):
             DATE_FORMAT(b.booking_date, '%%d/%%m/%%Y') AS booking_date,
             TIME_FORMAT(b.booking_time, '%%H:%%i') AS booking_time,
             b.customer_name,
+            b.user_id,
+            b.total_price,
             sb.status_booking_name,
             e.fullname AS employee_name,
 

@@ -6,7 +6,42 @@ from services.db import get_conn
 def get_all_review():
     conn = get_conn()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM address where deleted_at is null")
+    cur.execute("""
+        SELECT
+            r.review_id,
+            r.rating,
+            r.comment,
+            r.user_id,
+            r.store_id,
+            r.created_at,
+            COALESCE(NULLIF(u.nickname, ''), NULLIF(u.username, ''), u.email, CONCAT('User #', r.user_id)) AS customer_name
+        FROM review r
+        LEFT JOIN users u ON r.user_id = u.user_id
+        ORDER BY r.created_at DESC, r.review_id DESC
+    """)
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return rows
+
+
+def get_reviews_by_store(store_id: int):
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT
+            r.review_id,
+            r.rating,
+            r.comment,
+            r.user_id,
+            r.store_id,
+            r.created_at,
+            COALESCE(NULLIF(u.nickname, ''), NULLIF(u.username, ''), u.email, CONCAT('User #', r.user_id)) AS customer_name
+        FROM review r
+        LEFT JOIN users u ON r.user_id = u.user_id
+        WHERE r.store_id = %s
+        ORDER BY r.created_at DESC, r.review_id DESC
+    """, (store_id,))
     rows = cur.fetchall()
     cur.close()
     conn.close()

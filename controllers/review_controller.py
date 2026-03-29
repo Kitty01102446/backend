@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from services.review_service import (
     get_all_review,
     get_review_by_id,
+    get_reviews_by_store,
     insert_review,
     update_review,
     delete_review,
@@ -15,6 +16,12 @@ review_bp = Blueprint("review_bp", __name__)
 @review_bp.route("/review", methods=["GET"])
 def list_review():
     rows = get_all_review()
+    return jsonify(rows), 200
+
+
+@review_bp.route("/review/store/<int:store_id>", methods=["GET"])
+def list_review_by_store(store_id: int):
+    rows = get_reviews_by_store(store_id)
     return jsonify(rows), 200
 
 

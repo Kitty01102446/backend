@@ -5,6 +5,8 @@ from services.promotion_service import (
     insert_promotion,
     update_promotion,
     delete_promotion,
+    get_promotion_by_store,
+    
 )
 
 promotion_bp = Blueprint("promotion_bp", __name__)
@@ -27,23 +29,40 @@ def create_promotion():
     if not data:
         return jsonify({"error": "Invalid or empty JSON payload"}), 400
 
-    required = ["name", "discount", "store_id", "type_promo_id"]
+    # ✅ เพิ่ม detail เข้าไปใน required
+    required = ["name", "detail", "discount", "store_id", "type_promo_id"]
     for field in required:
         if field not in data:
             return jsonify({"error": f"Missing required field: {field}"}), 400
 
+    # ✅ ดึงค่าจาก request
     name = data["name"]
+    detail = data["detail"]   # 🔥 เพิ่มตรงนี้
     discount = data["discount"]
     store_id = data["store_id"]
     type_promo_id = data["type_promo_id"]
+    promo_code = data.get("promo_code")
 
-    new_id = insert_promotion(name, discount, store_id, type_promo_id)
+    # optional
+    start_date = data.get("start_date")
+    end_date = data.get("end_date")
+
+    # ✅ เรียก service (ต้องแก้ service ด้วยนะ)
+    new_id = insert_promotion(
+        name,
+        detail,
+        discount,
+        store_id,
+        type_promo_id,
+        start_date,
+        end_date,
+        promo_code
+    )
 
     return jsonify({
         "message": "Promotion created successfully",
         "promotion_id": new_id
     }), 201
-
 
 # ============================================================
 #             GET /promotion/<id>
@@ -84,3 +103,9 @@ def delete_promotion_route(pid: int):
         return jsonify({"error": "Promotion not found"}), 404
 
     return jsonify({"message": "Promotion deleted"}), 200
+
+
+@promotion_bp.route("/promotion/store/<int:store_id>", methods=["GET"])
+def get_promotion_by_store_route(store_id):
+    rows = get_promotion_by_store(store_id)
+    return jsonify(rows), 200

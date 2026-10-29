@@ -438,6 +438,14 @@ def register_store_service(user_id, store_data, address_data, tags, services):
             """
             cur.execute(sql_service, (store_id, service_name, s_price, duration, desc, type_id))
 
+        # ---------- 5) เลื่อนสิทธิ์ผู้ใช้เป็นเจ้าของร้าน (role_id=2) ----------
+        # เดิมไม่มีจุดไหนในระบบอัปเกรด role_id ให้เลย ทำให้ RequireStoreAdmin
+        # (ซึ่งเช็ค role_id===2) บล็อกเจ้าของร้านใหม่ไม่ให้เข้าแดชบอร์ดของตัวเอง
+        # แม้แอดมินจะอนุมัติร้านแล้วก็ตาม -- ไม่แตะ role_id=3/4 (พนักงาน/แอดมิน)
+        cur.execute(
+            "UPDATE users SET role_id=2 WHERE user_id=%s AND role_id=1",
+            (user_id,)
+        )
 
         conn.commit()
         return store_id

@@ -44,6 +44,15 @@ def create_review():
     user_id = data["user_id"]
     store_id = data["store_id"]
 
+    try:
+        rating = int(rating)
+    except (TypeError, ValueError):
+        return jsonify({"error": "rating must be a number"}), 400
+    if rating < 1 or rating > 5:
+        return jsonify({"error": "rating must be between 1 and 5"}), 400
+    if not str(comment).strip():
+        return jsonify({"error": "comment is required"}), 400
+
     new_id = insert_review(rating, comment, user_id, store_id)
 
     return jsonify({

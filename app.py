@@ -60,6 +60,12 @@ def create_app():
         from controllers.type_service_controller import type_service_bp
         from controllers.click_log_controller import click_log_bp
         from controllers.booking_controller import booking_bp
+        from controllers.employee_status_controller import employee_status_bp
+        from controllers.payroll_controller import payroll_bp
+        from controllers.notification_controller import notification_bp
+        from controllers.admin_controller import admin_bp
+        from controllers.complaint_controller import complaint_bp
+        from controllers.content_controller import content_bp
 
 
         print("📌 employee_controller loaded")
@@ -88,6 +94,12 @@ def create_app():
         app.register_blueprint(type_service_bp)
         app.register_blueprint(click_log_bp)
         app.register_blueprint(booking_bp)
+        app.register_blueprint(employee_status_bp)
+        app.register_blueprint(payroll_bp)
+        app.register_blueprint(notification_bp)
+        app.register_blueprint(admin_bp)
+        app.register_blueprint(complaint_bp)
+        app.register_blueprint(content_bp)
 
 
 

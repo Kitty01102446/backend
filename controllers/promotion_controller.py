@@ -29,8 +29,9 @@ def create_promotion():
     if not data:
         return jsonify({"error": "Invalid or empty JSON payload"}), 400
 
-    # ✅ เพิ่ม detail เข้าไปใน required
-    required = ["name", "detail", "discount", "store_id", "type_promo_id"]
+    # ✅ เพิ่ม detail เข้าไปใน required -- store_id ไม่บังคับ: เว้นว่าง = โปรโมชั่น
+    # ทั้งแพลตฟอร์ม (ใช้โดยหน้าแอดมิน), ร้านค้าทั่วไปยังส่ง store_id ตามเดิม
+    required = ["name", "detail", "discount", "type_promo_id"]
     for field in required:
         if field not in data:
             return jsonify({"error": f"Missing required field: {field}"}), 400
@@ -39,7 +40,7 @@ def create_promotion():
     name = data["name"]
     detail = data["detail"]   # 🔥 เพิ่มตรงนี้
     discount = data["discount"]
-    store_id = data["store_id"]
+    store_id = data.get("store_id")
     type_promo_id = data["type_promo_id"]
     promo_code = data.get("promo_code")
 

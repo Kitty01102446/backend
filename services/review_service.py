@@ -17,6 +17,7 @@ def get_all_review():
             COALESCE(NULLIF(u.nickname, ''), NULLIF(u.username, ''), u.email, CONCAT('User #', r.user_id)) AS customer_name
         FROM review r
         LEFT JOIN users u ON r.user_id = u.user_id
+        WHERE r.is_hidden = 0
         ORDER BY r.created_at DESC, r.review_id DESC
     """)
     rows = cur.fetchall()
@@ -39,7 +40,7 @@ def get_reviews_by_store(store_id: int):
             COALESCE(NULLIF(u.nickname, ''), NULLIF(u.username, ''), u.email, CONCAT('User #', r.user_id)) AS customer_name
         FROM review r
         LEFT JOIN users u ON r.user_id = u.user_id
-        WHERE r.store_id = %s
+        WHERE r.store_id = %s AND r.is_hidden = 0
         ORDER BY r.created_at DESC, r.review_id DESC
     """, (store_id,))
     rows = cur.fetchall()

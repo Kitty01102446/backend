@@ -1,6 +1,5 @@
 import os
 import sys
-from app import bcrypt
 from flask import Blueprint, request, jsonify
 from services.type_service_service import get_all_type_services
 from werkzeug.security import generate_password_hash
@@ -37,7 +36,8 @@ from services.users_service import (
     update_user,
     delete_user,
     login_user,
-    login_google_service
+    login_google_service,
+    get_user_by_contact,
 )
 
 users_bp = Blueprint("users_bp", __name__)
@@ -63,6 +63,16 @@ def register_user():
 
     if not username or not email or not password:
         return jsonify({"success": False, "message": "Missing required fields"}), 400
+
+    # อีเมล/เบอร์โทรซ้ำกับบัญชีอื่น -- เช็คก่อน insert เพราะคอลัมน์ email มี
+    # UNIQUE KEY ถ้าไม่เช็คก่อน insert_user จะ insert ไม่ผ่านแบบเงียบ ๆ แล้วคืน
+    # None ทำให้ผู้ใช้เห็นแค่ 500 ทั่วไปโดยไม่รู้สาเหตุ
+    existing = get_user_by_contact(email=email, phone=phone)
+    if existing:
+        return jsonify({
+            "success": False,
+            "message": "อีเมลหรือเบอร์โทรนี้มีบัญชีอยู่แล้วในระบบ กรุณาเข้าสู่ระบบ หรือใช้อีเมล/เบอร์โทรอื่น"
+        }), 409
 
     try:
         # ✅ 1. ทำการ Hash รหัสผ่านตรงนี้ก่อนส่งไป Service
@@ -235,15 +245,25 @@ def login():
                 "message": "Invalid credentials: email/phone or password is incorrect"
             }), 401
 
+    except PermissionError as e:
+        return jsonify({"message": str(e)}), 403
+
+    try:
+        from services.auth_service import generate_token
+
         # ส่งข้อมูลผู้ใช้กลับไป (ไม่ควรส่งข้อมูลรหัสผ่าน)
         return jsonify({
             "status": "success",
+            "token": generate_token(user["user_id"], user["role_id"]),
             "user": {
                 "user_id": user["user_id"],
                 "username": user["username"],
                 "nickname": user["nickname"],
                 "email": user["email"],
-                "role_id": user["role_id"]
+                "role_id": user["role_id"],
+                "employee_id": user["employee_id"],
+                "employee_store_id": user["employee_store_id"],
+                "owned_store_ids": user["owned_store_ids"],
             }
         }), 200
 
@@ -253,6 +273,83 @@ def login():
         return jsonify({
             "message": "Internal server error, please try again later"
         }), 500
+# ============================================================
+#   POST /forgot-password -- ขอรหัสรีเซ็ตรหัสผ่าน
+#   (เว็บนี้ยังไม่มีระบบส่งอีเมลจริง จึงส่งรหัสกลับมาในคำตอบเลย
+#   เพื่อให้ frontend แสดงบนหน้าจอ -- โหมดพัฒนา)
+# ============================================================
+@users_bp.route("/forgot-password", methods=["POST"])
+def forgot_password():
+    data = request.get_json(silent=True) or {}
+    identifier = data.get("identifier") or data.get("email")
+
+    if not identifier:
+        return jsonify({"error": "กรุณากรอกอีเมลหรือเบอร์โทรศัพท์"}), 400
+
+    try:
+        from services.users_service import request_password_reset
+        result = request_password_reset(identifier)
+
+        if not result:
+            return jsonify({"error": "ไม่พบบัญชีผู้ใช้นี้ในระบบ"}), 404
+
+        return jsonify({
+            "status": "success",
+            "message": "สร้างรหัสรีเซ็ตรหัสผ่านสำเร็จ (โหมดพัฒนา: เว็บนี้ยังไม่มีระบบส่งอีเมลจริง)",
+            "dev_mode": True,
+            "reset_code": result["reset_code"],
+            "expires_at": result["expires_at"],
+        }), 200
+
+    except Exception as e:
+        print("forgot-password error:", repr(e))
+        return jsonify({"error": "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง"}), 500
+
+
+# ============================================================
+#   POST /reset-password -- ตั้งรหัสผ่านใหม่ด้วยรหัสรีเซ็ต
+# ============================================================
+@users_bp.route("/reset-password", methods=["POST"])
+def reset_password_route():
+    data = request.get_json(silent=True) or {}
+    reset_code = data.get("reset_code")
+    new_password = data.get("new_password")
+
+    if not reset_code or not new_password:
+        return jsonify({"error": "กรุณากรอกรหัสรีเซ็ตและรหัสผ่านใหม่"}), 400
+
+    if len(new_password) < 6:
+        return jsonify({"error": "รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร"}), 400
+
+    try:
+        from services.users_service import confirm_password_reset
+        ok = confirm_password_reset(reset_code, new_password)
+
+        if not ok:
+            return jsonify({"error": "รหัสรีเซ็ตไม่ถูกต้องหรือหมดอายุแล้ว"}), 400
+
+        return jsonify({"status": "success", "message": "ตั้งรหัสผ่านใหม่สำเร็จ"}), 200
+
+    except Exception as e:
+        print("reset-password error:", repr(e))
+        return jsonify({"error": "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง"}), 500
+
+
+# ============================================================
+#   GET /me  -- ให้ frontend เช็คสิทธิ์/ตัวตนปัจจุบันจาก token (ไม่พึ่ง localStorage
+#   เดิมที่อาจเก่า/ถูกแก้ไข)
+# ============================================================
+@users_bp.route("/me", methods=["GET"])
+def me():
+    from services.auth_service import get_current_user
+
+    current = get_current_user()
+    if not current:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    return jsonify(current), 200
+
+
 # ============================================================
 #   Register Store Logic (วางไว้ก่อน Route)
 # ============================================================
@@ -273,7 +370,9 @@ def register_store_service(user_id, store_data, address_data, tags, services):
             INSERT INTO store (store_name, price, phone, email, user_id, status_store_id, created_at)
             VALUES (%s, %s, %s, %s, %s, %s, NOW())
         """
-        cur.execute(sql_store, (name, price, phone, email, user_id, 1))
+        # status_store_id=4 (pending) -- ร้านใหม่ต้องรอผู้ดูแลระบบอนุมัติก่อนขึ้น
+        # เป็น active (1) และแสดงต่อลูกค้า
+        cur.execute(sql_store, (name, price, phone, email, user_id, 4))
         store_id = cur.lastrowid
 
         # ---------- 2) ADDRESS ----------
@@ -286,15 +385,35 @@ def register_store_service(user_id, store_data, address_data, tags, services):
         open_time = address_data.get("open_time") or "10:00"
         close_time = address_data.get("close_time") or "20:00"
 
+        # ถ้าร้านปักหมุดพิกัดเอง (latitude/longitude) ให้ใช้ค่านั้นก่อน
+        # ไม่งั้นค่อยแปลงที่อยู่เป็นพิกัดอัตโนมัติ
+        latitude = longitude = None
+        manual_lat = address_data.get("latitude")
+        manual_lng = address_data.get("longitude")
+        if manual_lat not in (None, "") and manual_lng not in (None, ""):
+            try:
+                latitude, longitude = float(manual_lat), float(manual_lng)
+            except (TypeError, ValueError):
+                latitude = longitude = None
+
+        if latitude is None or longitude is None:
+            from services.geocode_service import geocode_address
+            full_address = ", ".join(
+                part for part in [street, subdistrict, district, province] if part
+            )
+            latitude, longitude = geocode_address(full_address)
+
         sql_addr = """
             INSERT INTO store_address (
                 store_id, province, district, subdistrict, postal_code,
-                recommend_text, street, open_time, close_time
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                recommend_text, street, open_time, close_time,
+                latitude, longitude
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         cur.execute(sql_addr, (
             store_id, province, district, subdistrict, postal_code,
-            recommend_text, street, open_time, close_time
+            recommend_text, street, open_time, close_time,
+            latitude, longitude
         ))
 
         # ---------- 3) TAGS ----------
@@ -372,6 +491,13 @@ def register_store_route():
 
     if not user_id or not store_info.get("name"):
         return jsonify({"success": False, "message": "ข้อมูลไม่ครบถ้วน: ต้องมี user_id และ store.name"}), 400
+
+    from services.employee_service import get_employee_by_user_id
+    if get_employee_by_user_id(user_id):
+        return jsonify({
+            "success": False,
+            "message": "คุณเป็นพนักงานของร้านอยู่ ไม่สามารถเปิดร้านได้ กรุณาให้เจ้าของร้านลบบัญชีพนักงานของคุณออกก่อน"
+        }), 403
 
     try:
         new_store_id = register_store_service(user_id, store_info, address_info, tags, services)

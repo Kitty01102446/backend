@@ -86,7 +86,9 @@ def get_store_address_by_id(sid: int):
             has_parking,
             TIME_FORMAT(open_time, '%%H:%%i:%%s') AS open_time,
             TIME_FORMAT(close_time, '%%H:%%i:%%s') AS close_time,
-            recommend_text
+            recommend_text,
+            latitude,
+            longitude
         FROM store_address
         WHERE store_address_id = %s
           AND deleted_at IS NULL
@@ -101,9 +103,26 @@ def get_store_address_by_id(sid: int):
 # ============================================================
 #                INSERT STORE ADDRESS
 # ============================================================
+def _geocode_from_data(data: dict):
+    """แปลงที่อยู่จากฟิลด์ province/district/subdistrict/street เป็นพิกัดอัตโนมัติ"""
+    from services.geocode_service import geocode_address
+
+    full_address = ", ".join(
+        part for part in [
+            data.get("street"),
+            data.get("subdistrict"),
+            data.get("district"),
+            data.get("province"),
+        ] if part
+    )
+    return geocode_address(full_address)
+
+
 def insert_store_address(data: dict):
     conn = get_conn()
     cur = conn.cursor()
+
+    latitude, longitude = _geocode_from_data(data)
 
     sql = """
         INSERT INTO store_address (
@@ -118,9 +137,10 @@ def insert_store_address(data: dict):
             open_time,
             close_time,
             recommend_text,
-            created_at
+            latitude,
+            longitude
         )
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,NOW())
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
     """
 
     cur.execute(sql, (
@@ -134,7 +154,9 @@ def insert_store_address(data: dict):
         data.get("has_parking", 0),
         data.get("open_time"),
         data.get("close_time"),
-        data.get("recommend_text")
+        data.get("recommend_text"),
+        latitude,
+        longitude,
     ))
 
     conn.commit()
@@ -151,6 +173,8 @@ def update_store_address(sid: int, data: dict):
     conn = get_conn()
     cur = conn.cursor()
 
+    latitude, longitude = _geocode_from_data(data)
+
     sql = """
         UPDATE store_address
         SET province=%s,
@@ -163,7 +187,8 @@ def update_store_address(sid: int, data: dict):
             open_time=%s,
             close_time=%s,
             recommend_text=%s,
-            updated_at=NOW()
+            latitude=%s,
+            longitude=%s
         WHERE store_address_id=%s
           AND deleted_at IS NULL
     """
@@ -179,9 +204,33 @@ def update_store_address(sid: int, data: dict):
         data.get("open_time"),
         data.get("close_time"),
         data.get("recommend_text"),
+        latitude,
+        longitude,
         sid
     ))
 
+    conn.commit()
+    updated = cur.rowcount > 0
+
+    cur.close()
+    conn.close()
+    return updated
+
+# ============================================================
+#                UPDATE PIN (LAT/LNG) BY STORE_ID
+# ============================================================
+def update_store_location(store_id: int, latitude: float, longitude: float):
+    conn = get_conn()
+    cur = conn.cursor()
+
+    sql = """
+        UPDATE store_address
+        SET latitude=%s, longitude=%s
+        WHERE store_id=%s
+          AND deleted_at IS NULL
+    """
+
+    cur.execute(sql, (latitude, longitude, store_id))
     conn.commit()
     updated = cur.rowcount > 0
 

@@ -5,7 +5,9 @@ from services.store_service import (
     insert_store,
     update_store,
     delete_store,
+    get_nearby_stores,
 )
+from services.store_address_service import update_store_location
 from services.db import get_conn
 
 
@@ -76,6 +78,35 @@ def update_store_route(sid: int):
     }), 200
 
 
+@store_bp.route("/store/<int:sid>/location", methods=["PUT"])
+def update_store_location_route(sid: int):
+    data = request.get_json(silent=True)
+
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    try:
+        latitude = float(data.get("latitude"))
+        longitude = float(data.get("longitude"))
+    except (TypeError, ValueError):
+        return jsonify({"error": "latitude/longitude ต้องเป็นตัวเลข"}), 400
+
+    if not (-90 <= latitude <= 90) or not (-180 <= longitude <= 180):
+        return jsonify({"error": "latitude/longitude อยู่นอกช่วงที่ถูกต้อง"}), 400
+
+    updated = update_store_location(sid, latitude, longitude)
+
+    if not updated:
+        return jsonify({"error": "ไม่พบที่อยู่ร้านนี้"}), 404
+
+    return jsonify({
+        "message": "อัปเดตพิกัดร้านสำเร็จ",
+        "store_id": sid,
+        "latitude": latitude,
+        "longitude": longitude,
+    }), 200
+
+
 @store_bp.route("/store/<int:sid>", methods=["DELETE"])
 def delete_store_route(sid: int):
     deleted = delete_store(sid)
@@ -128,6 +159,33 @@ def get_store_by_user(user_id):
         return jsonify({
             "has_store": False
         }), 200
+
+
+# ============================================================
+#   GET /store/nearby -- ค้นหาร้านใกล้ตำแหน่งลูกค้า (หรือตามจังหวัด)
+# ============================================================
+@store_bp.route("/store/nearby", methods=["GET"])
+def nearby_stores():
+    lat = request.args.get("lat", type=float)
+    lng = request.args.get("lng", type=float)
+    province = request.args.get("province", type=str)
+    radius_km = request.args.get("radius_km", default=5, type=float)
+    limit = request.args.get("limit", default=20, type=int)
+
+    if (lat is None or lng is None) and not province:
+        return jsonify({
+            "error": "ต้องระบุพิกัด lat/lng หรือ province อย่างใดอย่างหนึ่ง"
+        }), 400
+
+    try:
+        rows = get_nearby_stores(
+            lat=lat, lng=lng, province=province,
+            radius_km=radius_km, limit=limit,
+        )
+        return jsonify({"status": "success", "data": rows}), 200
+    except Exception as e:
+        print("nearby_stores error:", repr(e))
+        return jsonify({"error": "ไม่สามารถค้นหาร้านใกล้เคียงได้"}), 500
 
 
 @store_bp.route("/store/<int:sid>/info", methods=["GET"])
